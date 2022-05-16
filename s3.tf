@@ -4,13 +4,13 @@ resource "aws_s3_bucket" "airflow" {
   acl    = "private"
 
   versioning {
-    enabled = true
+    enabled = false
   }
 
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
-        sse_algorithm = "aws:kms"
+        sse_algorithm = "AES256"
       }
     }
   }
@@ -39,6 +39,13 @@ resource "aws_s3_bucket_object" "airflow_seed_dag" {
     MONTH        = local.month
     DAY          = local.day
   })
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to tags, e.g. because a management agent
+      # updates these based on some ruleset managed elsewhere.
+      content,
+    ]
+  }
 }
 
 resource "aws_s3_bucket_object" "airflow_example_dag" {
